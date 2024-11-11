@@ -27,3 +27,9 @@ model posts {
   author   users  @relation(fields: [authorId], references: [id])
   authorId String
 }
+
+model Comment {
+  id      String   @id @default(cuid())
+  content String
+  createdAt DateTime @default(now())
+}
