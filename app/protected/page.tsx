@@ -37,8 +37,6 @@ function App() {
   const handleLogin = async (username: string, password: string) => {
     username = username.trim();
     const hashedPassword = await hashPassword(password);
-    console.log("Hashed password:", hashedPassword);
-    console.log("Users:", users);
     if (users[username] && users[username] === hashedPassword) {
       document.cookie = "authToken=true; path=/";
       setIsAuthenticated(true);
