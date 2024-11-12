@@ -40,7 +40,7 @@ export default function Comments() {
   };
 
   return (
-    <div className="mt-16 mx-40">
+    <div className="mt-16 mx-40 rounded-lg shadow-md p-8">
       <h2 className="text-lg font-bold">Comments</h2>
 
       <textarea

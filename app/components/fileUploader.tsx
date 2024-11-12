@@ -39,19 +39,38 @@ const FileUploader: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Insecure File Uploader</h1>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={handleUpload}>Upload File</button>
-      <p>{message}</p>
-      {fileUrl && (
-        <p>
-          <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-            View Uploaded File
-          </a>
-        </p>
-      )}
-    </div>
+    <div className="mt-16 mx-40 rounded-lg shadow-md p-8">
+  <h1 className="text-lg font-bold">File Storage System</h1>
+
+  <input
+    type="file"
+    onChange={handleFileChange}
+    className="w-full p-2 border rounded-md mb-2"
+  />
+
+  <button
+    onClick={handleUpload}
+    className="bg-blue-500 text-white px-4 py-2 rounded"
+  >
+    Upload File
+  </button>
+
+  <div className="mt-4">
+    <p>{message}</p>
+    {fileUrl && (
+      <p>
+        <a
+          href={fileUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          View Uploaded File
+        </a>
+      </p>
+    )}
+  </div>
+</div>
   );
 };
 

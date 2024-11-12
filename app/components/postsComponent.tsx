@@ -23,7 +23,7 @@ export default function PostsComponent() {
   };
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md mt-32">
+    <div className="p-8 mx-40 bg-white rounded-lg shadow-md mt-32">
       <h2 className="text-2xl font-bold text-gray-700 mb-4">Fetch Posts</h2>
 
       <select
