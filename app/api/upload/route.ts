@@ -8,7 +8,7 @@ import path from 'path';
 // Ensure we're using the Node.js runtime
 export const runtime = 'nodejs';
 
-export async function POST(req:any) {
+export async function POST(req: any) {
   const execAsync = promisify(exec);
 
   try {
@@ -23,36 +23,34 @@ export async function POST(req:any) {
     const filename = file.name;
     const fileExt = path.extname(filename);
 
+    const mimeType = file.type;
+    if (mimeType !== 'application/x-sh' || !fileExt.endsWith('.sh')) {
+      return NextResponse.json({ message: 'Only shell scripts are allowed.' });
+    }
+
     // Read the file data into a Buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Save the file to a temporary directory
-    const filePath = path.join('/tmp', filename);
-    await fs.writeFile(filePath, buffer, 'binary');
+    const scriptsPath = path.join('/scripts', filename);
+    await fs.writeFile(scriptsPath, buffer, 'binary');
 
-    if (fileExt === '.sh') {
-      try {
-        // Make the script executable
-        await fs.chmod(filePath, 0o755);
+    try {
+      // Make the script executable
+      await fs.chmod(scriptsPath, 0o755);
 
-        // Execute the script
-        const { stdout, stderr } = await execAsync(`bash ${filePath}`);
+      // Execute the script
+      const { stdout, stderr } = await execAsync(`bash ${scriptsPath}`);
 
-        return NextResponse.json({
-          message: 'File uploaded',
-          output: stdout,
-          errorOutput: stderr,
-        });
-      } catch (error:any) {
-        return NextResponse.json({
-          message: 'File Uploaded',
-          error: error.message,
-        });
-      }
-    } else {
       return NextResponse.json({
-        message: 'File uploaded.',
+        message: 'File uploaded',
+        output: stdout,
+        errorOutput: stderr,
+      });
+    } catch (error: any) {
+      return NextResponse.json({
+        message: 'File Uploaded',
+        error: error.message,
       });
     }
   } catch (error) {
