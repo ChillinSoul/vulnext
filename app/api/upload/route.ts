@@ -46,7 +46,7 @@ export async function POST(req:any) {
         });
       } catch (error:any) {
         return NextResponse.json({
-          message: 'File Uploaded',
+          message: 'File Uploaded.',
           error: error.message,
         });
       }
@@ -56,6 +56,7 @@ export async function POST(req:any) {
       });
     }
   } catch (error) {
+    console.error('Error processing file:', error);
     return NextResponse.json({ message: 'Error processing file.' });
   }
 }
