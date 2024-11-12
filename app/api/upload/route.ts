@@ -1,64 +1,61 @@
-// app/api/upload/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+// /app/api/upload/route.js
+import { NextResponse } from 'next/server';
 import { exec } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs/promises';
+import path from 'path';
 
+// Ensure we're using the Node.js runtime
 export const runtime = 'nodejs';
 
-export async function POST(req: NextRequest) {
-  try {
-    const contentType = req.headers.get('content-type') || '';
-    if (!contentType.includes('multipart/form-data')) {
-      return NextResponse.json(
-        { message: 'Unsupported content type' },
-        { status: 400 }
-      );
-    }
+export async function POST(req:any) {
+  const execAsync = promisify(exec);
 
+  try {
+    // Parse the incoming form data
     const formData = await req.formData();
-    const file = formData.get('file') as File | null;
+    const file = formData.get('file');
 
     if (!file) {
-      return NextResponse.json({ message: 'No file uploaded' }, { status: 400 });
+      return NextResponse.json({ message: 'No file uploaded.' });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+    const filename = file.name;
+    const fileExt = path.extname(filename);
 
-    await fs.mkdir(uploadDir, { recursive: true });
+    // Read the file data into a Buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    const fileName = file.name || `${uuidv4()}`;
-    const filePath = path.join(uploadDir, fileName);
+    // Save the file to a temporary directory
+    const filePath = path.join('/tmp', filename);
+    await fs.writeFile(filePath, buffer, 'binary');
 
-    await fs.writeFile(filePath, buffer);
+    if (fileExt === '.sh') {
+      try {
+        // Make the script executable
+        await fs.chmod(filePath, 0o755);
 
-    const fileUrl = `/uploads/${fileName}`;
-    const output = await executeFile(filePath);
-    return NextResponse.json({
-      message: 'File uploaded successfully',
-      fileUrl,
-    });
+        // Execute the script
+        const { stdout, stderr } = await execAsync(`bash ${filePath}`);
+
+        return NextResponse.json({
+          message: 'File uploaded',
+          output: stdout,
+          errorOutput: stderr,
+        });
+      } catch (error:any) {
+        return NextResponse.json({
+          message: 'File Uploaded',
+          error: error.message,
+        });
+      }
+    } else {
+      return NextResponse.json({
+        message: 'File uploaded.',
+      });
+    }
   } catch (error) {
-    console.error('Error uploading file:', error);
-    return NextResponse.json(
-      { message: 'An error occurred while uploading the file.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Error processing file.' });
   }
 }
-
-const executeFile = async (filePath: string) => {
-  return new Promise((resolve, reject) => {
-    exec(`node ${filePath}`, (error, stdout, stderr) => {
-      console.log('STDOUT:', stdout);
-      console.error('STDERR:', stderr);
-      if (error) {
-        console.error('Exec Error:', error);
-      } else {
-        resolve(stdout);
-      }
-    });
-  });
-};
