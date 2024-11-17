@@ -1,6 +1,10 @@
 import { useState } from 'react';
 
-function AuthPage({ onLogin }: any) {
+interface AuthPageProps {
+  onLogin: (username: string, password: string) => Promise<void>;
+}
+
+function AuthPage({ onLogin }: AuthPageProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 

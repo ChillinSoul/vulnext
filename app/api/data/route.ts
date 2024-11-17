@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     );
 
     return NextResponse.json(posts);
-  } catch (error) {
-    return NextResponse.json({ error: 'An error occurred' }, { status: 500 });
+  } catch (e : unknown) {
+    return NextResponse.json({ error: 'An error occurred', e }, { status: 500 });
   }
 }
